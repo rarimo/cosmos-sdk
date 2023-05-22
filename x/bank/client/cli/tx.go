@@ -2,14 +2,14 @@ package cli
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	cosmostypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"github.com/spf13/cobra"
 )
 
 var FlagSplit = "split"
@@ -27,6 +27,7 @@ func NewTxCmd() *cobra.Command {
 	txCmd.AddCommand(
 		NewSendTxCmd(),
 		NewMultiSendTxCmd(),
+		NewMintProposalTxCmd(),
 	)
 
 	return txCmd
@@ -138,6 +139,65 @@ When using '--dry-run' a key name cannot be used, only a bech32 address.
 	}
 
 	cmd.Flags().Bool(FlagSplit, false, "Send the equally split token amount to each address")
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func NewMintProposalTxCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "mint-proposal [title] [description] [receiver] [amount] [deposit]",
+		Short: `Mint tokens (TESTNET FUNCTIONAL ONLY)`,
+		Args:  cobra.ExactArgs(5),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			title := args[0]
+			description := args[1]
+
+			receiver, err := sdk.AccAddressFromBech32(args[2])
+			if err != nil {
+				return err
+			}
+
+			coins, err := sdk.ParseCoinsNormalized(args[3])
+			if err != nil {
+				return err
+			}
+
+			deposit, err := sdk.ParseCoinsNormalized(args[4])
+			if err != nil {
+				return err
+			}
+
+			content := &types.MintTokensProposal{
+				Title:       title,
+				Description: description,
+				ToAddress:   receiver.String(),
+				Amount:      coins,
+			}
+
+			contentDetails, err := cosmostypes.NewAnyWithValue(content)
+			if err != nil {
+				return err
+			}
+
+			msg := &govtypes.MsgSubmitProposal{
+				Content:        contentDetails,
+				InitialDeposit: deposit,
+				Proposer:       clientCtx.GetFromAddress().String(),
+			}
+
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
 
 	flags.AddTxFlagsToCmd(cmd)
 

@@ -85,7 +85,7 @@ func TestMigrateJSON(t *testing.T) {
 	"deposits": [],
 	"proposals": [
 		{
-			"deposit_end_time": "2001-09-09T01:46:40Z",
+			"deposit_end_block": "200000000",
 			"final_tally_result": {
 				"abstain_count": "0",
 				"no_count": "0",
@@ -106,15 +106,15 @@ func TestMigrateJSON(t *testing.T) {
 			],
 			"metadata": "",
 			"status": "PROPOSAL_STATUS_DEPOSIT_PERIOD",
-			"submit_time": "2001-09-09T01:46:40Z",
+			"submit_block": "200000000",
 			"total_deposit": [
 				{
 					"amount": "123",
 					"denom": "stake"
 				}
 			],
-			"voting_end_time": "2001-09-09T01:46:40Z",
-			"voting_start_time": "2001-09-09T01:46:40Z"
+			"voting_end_block": "200000000",
+			"voting_end_block": "200000000"
 		}
 	],
 	"starting_proposal_id": "1",
