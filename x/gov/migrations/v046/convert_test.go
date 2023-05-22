@@ -1,33 +1,31 @@
 package v046_test
 
 import (
-	"testing"
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	v046 "github.com/cosmos/cosmos-sdk/x/gov/migrations/v046"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestConvertToLegacyProposal(t *testing.T) {
-	propTime := time.Unix(1e9, 0)
+	propBlock := uint64(200000000)
 	legacyContentMsg, err := v1.NewLegacyContent(v1beta1.NewTextProposal("title", "description"), "cosmos1fl48vsnmsdzcv85q5d2q4z5ajdha8yu34mf0eh")
 	require.NoError(t, err)
 	msgs := []sdk.Msg{legacyContentMsg}
 	msgsAny, err := tx.SetMsgs(msgs)
 	require.NoError(t, err)
 	proposal := v1.Proposal{
-		Id:              1,
-		Status:          v1.StatusDepositPeriod,
-		Messages:        msgsAny,
-		SubmitTime:      &propTime,
-		DepositEndTime:  &propTime,
-		VotingStartTime: &propTime,
-		VotingEndTime:   &propTime,
-		Metadata:        "proposal metadata",
+		Id:               1,
+		Status:           v1.StatusDepositPeriod,
+		Messages:         msgsAny,
+		SubmitBlock:      propBlock,
+		DepositEndBlock:  propBlock,
+		VotingStartBlock: propBlock,
+		VotingEndBlock:   propBlock,
+		Metadata:         "proposal metadata",
 	}
 
 	testCases := map[string]struct {
@@ -52,10 +50,10 @@ func TestConvertToLegacyProposal(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, v1beta1Proposal.ProposalId, proposal.Id)
-				require.Equal(t, v1beta1Proposal.VotingStartTime, *proposal.VotingStartTime)
-				require.Equal(t, v1beta1Proposal.VotingEndTime, *proposal.VotingEndTime)
-				require.Equal(t, v1beta1Proposal.SubmitTime, *proposal.SubmitTime)
-				require.Equal(t, v1beta1Proposal.DepositEndTime, *proposal.DepositEndTime)
+				require.Equal(t, v1beta1Proposal.VotingStartBlock, proposal.VotingStartBlock)
+				require.Equal(t, v1beta1Proposal.VotingEndBlock, proposal.VotingEndBlock)
+				require.Equal(t, v1beta1Proposal.SubmitBlock, proposal.SubmitBlock)
+				require.Equal(t, v1beta1Proposal.DepositEndBlock, proposal.DepositEndBlock)
 				require.Equal(t, v1beta1Proposal.FinalTallyResult.Yes, sdk.NewInt(0))
 				require.Equal(t, v1beta1Proposal.FinalTallyResult.No, sdk.NewInt(0))
 				require.Equal(t, v1beta1Proposal.FinalTallyResult.NoWithVeto, sdk.NewInt(0))

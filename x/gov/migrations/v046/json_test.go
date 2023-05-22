@@ -2,11 +2,9 @@ package v046_test
 
 import (
 	"encoding/json"
-	"testing"
-	"time"
-
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/require"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -32,17 +30,17 @@ func TestMigrateJSON(t *testing.T) {
 	require.NoError(t, err)
 
 	govGenState := v1beta1.DefaultGenesisState()
-	propTime := time.Unix(1e9, 0)
+	propBlock := uint64(200000000)
 	contentAny, err := codectypes.NewAnyWithValue(v1beta1.NewTextProposal("my title", "my desc").(proto.Message))
 	require.NoError(t, err)
 	govGenState.Proposals = v1beta1.Proposals{
 		v1beta1.Proposal{
 			ProposalId:       1,
 			Content:          contentAny,
-			SubmitTime:       propTime,
-			DepositEndTime:   propTime,
-			VotingStartTime:  propTime,
-			VotingEndTime:    propTime,
+			SubmitBlock:      propBlock,
+			DepositEndBlock:  propBlock,
+			VotingStartBlock: propBlock,
+			VotingEndBlock:   propBlock,
 			Status:           v1beta1.StatusDepositPeriod,
 			FinalTallyResult: v1beta1.EmptyTallyResult(),
 			TotalDeposit:     sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(123))),
@@ -76,7 +74,7 @@ func TestMigrateJSON(t *testing.T) {
 	// - Proposals use MsgExecLegacyContent
 	expected := `{
 	"deposit_params": {
-		"max_deposit_period": "172800s",
+		"max_deposit_period": "34560",
 		"min_deposit": [
 			{
 				"amount": "10000000",
@@ -150,7 +148,7 @@ func TestMigrateJSON(t *testing.T) {
 		}
 	],
 	"voting_params": {
-		"voting_period": "172800s"
+		"voting_period": "34560"
 	}
 }`
 

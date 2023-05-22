@@ -200,8 +200,8 @@ func TestQueries(t *testing.T) {
 
 	proposal2.TotalDeposit = sdk.NewCoins(proposal2.TotalDeposit...).Add(deposit4.Amount...)
 	proposal2.Status = v1.StatusVotingPeriod
-	votingEndTime := ctx.BlockTime().Add(v1.DefaultPeriod)
-	proposal2.VotingEndTime = &votingEndTime
+
+	proposal2.VotingEndBlock = v1.DefaultPeriod + uint64(ctx.BlockHeader().Height)
 
 	deposit5 := v1.NewDeposit(proposal3.Id, TestAddrs[1], depositParams.MinDeposit)
 	depositer5, err := sdk.AccAddressFromBech32(deposit5.Depositor)
@@ -211,8 +211,8 @@ func TestQueries(t *testing.T) {
 
 	proposal3.TotalDeposit = sdk.NewCoins(proposal3.TotalDeposit...).Add(deposit5.Amount...)
 	proposal3.Status = v1.StatusVotingPeriod
-	votingEndTime = ctx.BlockTime().Add(v1.DefaultPeriod)
-	proposal3.VotingEndTime = &votingEndTime
+
+	proposal3.VotingEndBlock = v1.DefaultPeriod + uint64(ctx.BlockHeader().Height)
 	// total deposit of TestAddrs[1] on proposal #3 is worth the proposal deposit + individual deposit
 	deposit5.Amount = sdk.NewCoins(deposit5.Amount...).Add(deposit3.Amount...)
 
@@ -419,11 +419,11 @@ func checkEqualProposal(t *testing.T, p1, p2 v1.Proposal) {
 	require.Equal(t, p1.Messages, p2.Messages)
 	require.Equal(t, p1.Status, p2.Status)
 	require.Equal(t, p1.FinalTallyResult, p2.FinalTallyResult)
-	require.Equal(t, p1.SubmitTime, p2.SubmitTime)
-	require.Equal(t, p1.DepositEndTime, p2.DepositEndTime)
+	require.Equal(t, p1.SubmitBlock, p2.SubmitBlock)
+	require.Equal(t, p1.DepositEndBlock, p2.DepositEndBlock)
 	require.Equal(t, p1.TotalDeposit, p2.TotalDeposit)
-	require.Equal(t, convertNilToDefault(p1.VotingStartTime), convertNilToDefault(p2.VotingStartTime))
-	require.Equal(t, convertNilToDefault(p1.VotingEndTime), convertNilToDefault(p2.VotingEndTime))
+	require.Equal(t, p1.VotingStartBlock, p2.VotingStartBlock)
+	require.Equal(t, p1.VotingEndBlock, p2.VotingEndBlock)
 }
 
 // convertNilToDefault converts a (*time.Time)(<nil>) into a (*time.Time)(<default>)).

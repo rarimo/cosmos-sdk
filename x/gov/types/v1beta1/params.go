@@ -11,7 +11,7 @@ import (
 
 // Default period for deposits & voting
 const (
-	DefaultPeriod time.Duration = time.Hour * 24 * 2 // 2 days
+	DefaultPeriod uint64 = uint64(time.Hour * 24 * 2 / (5 * time.Second)) // 2 days in blocks
 )
 
 // Default governance params
@@ -23,10 +23,10 @@ var (
 )
 
 // NewDepositParams creates a new DepositParams object
-func NewDepositParams(minDeposit sdk.Coins, maxDepositPeriod time.Duration) DepositParams {
+func NewDepositParams(minDeposit sdk.Coins, maxDepositPeriodInBlocks uint64) DepositParams {
 	return DepositParams{
 		MinDeposit:       minDeposit,
-		MaxDepositPeriod: maxDepositPeriod,
+		MaxDepositPeriod: maxDepositPeriodInBlocks,
 	}
 }
 
@@ -119,9 +119,9 @@ func validateTallyParams(i interface{}) error { //nolint:unused
 }
 
 // NewVotingParams creates a new VotingParams object
-func NewVotingParams(votingPeriod time.Duration) VotingParams {
+func NewVotingParams(votingPeriodInBlocks uint64) VotingParams {
 	return VotingParams{
-		VotingPeriod: votingPeriod,
+		VotingPeriod: votingPeriodInBlocks,
 	}
 }
 
@@ -149,7 +149,7 @@ func validateVotingParams(i interface{}) error {
 	}
 
 	if v.VotingPeriod <= 0 {
-		return fmt.Errorf("voting period must be positive: %s", v.VotingPeriod)
+		return fmt.Errorf("voting period must be positive: %d", v.VotingPeriod)
 	}
 
 	return nil

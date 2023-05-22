@@ -2,11 +2,9 @@ package v1beta1
 
 import (
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/gogo/protobuf/proto"
 	"sigs.k8s.io/yaml"
+	"strings"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,7 +15,7 @@ import (
 // DefaultStartingProposalID is 1
 const DefaultStartingProposalID uint64 = 1
 
-func NewProposal(content Content, id uint64, submitTime, depositEndTime time.Time) (Proposal, error) {
+func NewProposal(content Content, id uint64, submitBlock, depositEndBlock uint64) (Proposal, error) {
 	msg, ok := content.(proto.Message)
 	if !ok {
 		return Proposal{}, fmt.Errorf("%T does not implement proto.Message", content)
@@ -34,8 +32,8 @@ func NewProposal(content Content, id uint64, submitTime, depositEndTime time.Tim
 		Status:           StatusDepositPeriod,
 		FinalTallyResult: EmptyTallyResult(),
 		TotalDeposit:     sdk.NewCoins(),
-		SubmitTime:       submitTime,
-		DepositEndTime:   depositEndTime,
+		SubmitBlock:      submitBlock,
+		DepositEndBlock:  depositEndBlock,
 	}
 
 	return p, nil

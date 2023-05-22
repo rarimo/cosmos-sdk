@@ -5,14 +5,12 @@ package simulation
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"math/rand"
 )
 
 // Simulation parameter constants
@@ -26,8 +24,8 @@ const (
 )
 
 // GenDepositParamsDepositPeriod randomized DepositParamsDepositPeriod
-func GenDepositParamsDepositPeriod(r *rand.Rand) time.Duration {
-	return time.Duration(simulation.RandIntBetween(r, 1, 2*60*60*24*2)) * time.Second
+func GenDepositParamsDepositPeriod(r *rand.Rand) uint64 {
+	return uint64(simulation.RandIntBetween(r, 1, 60*60*24*2/5))
 }
 
 // GenDepositParamsMinDeposit randomized DepositParamsMinDeposit
@@ -36,8 +34,8 @@ func GenDepositParamsMinDeposit(r *rand.Rand) sdk.Coins {
 }
 
 // GenVotingParamsVotingPeriod randomized VotingParamsVotingPeriod
-func GenVotingParamsVotingPeriod(r *rand.Rand) time.Duration {
-	return time.Duration(simulation.RandIntBetween(r, 1, 2*60*60*24*2)) * time.Second
+func GenVotingParamsVotingPeriod(r *rand.Rand) uint64 {
+	return uint64(simulation.RandIntBetween(r, 1, 60*60*24*2/5))
 }
 
 // GenTallyParamsQuorum randomized TallyParamsQuorum
@@ -65,13 +63,13 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { minDeposit = GenDepositParamsMinDeposit(r) },
 	)
 
-	var depositPeriod time.Duration
+	var depositPeriod uint64
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, DepositParamsDepositPeriod, &depositPeriod, simState.Rand,
 		func(r *rand.Rand) { depositPeriod = GenDepositParamsDepositPeriod(r) },
 	)
 
-	var votingPeriod time.Duration
+	var votingPeriod uint64
 	simState.AppParams.GetOrGenerate(
 		simState.Cdc, VotingParamsVotingPeriod, &votingPeriod, simState.Rand,
 		func(r *rand.Rand) { votingPeriod = GenVotingParamsVotingPeriod(r) },

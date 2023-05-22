@@ -1,10 +1,8 @@
 package types
 
 import (
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,17 +17,17 @@ func TestProposalKeys(t *testing.T) {
 	require.Equal(t, int(proposalID), 1)
 
 	// key active proposal queue
-	now := time.Now()
+	now := uint64(42)
 	key = ActiveProposalQueueKey(3, now)
-	proposalID, expTime := SplitActiveProposalQueueKey(key)
+	proposalID, expBlock := SplitActiveProposalQueueKey(key)
 	require.Equal(t, int(proposalID), 3)
-	require.True(t, now.Equal(expTime))
+	require.Equal(t, now, expBlock)
 
 	// key inactive proposal queue
 	key = InactiveProposalQueueKey(3, now)
-	proposalID, expTime = SplitInactiveProposalQueueKey(key)
+	proposalID, expBlock = SplitInactiveProposalQueueKey(key)
 	require.Equal(t, int(proposalID), 3)
-	require.True(t, now.Equal(expTime))
+	require.Equal(t, now, expBlock)
 
 	// invalid key
 	require.Panics(t, func() { SplitProposalKey([]byte("test")) })

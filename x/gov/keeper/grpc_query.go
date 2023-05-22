@@ -376,11 +376,11 @@ func (q legacyQueryServer) Params(c context.Context, req *v1beta1.QueryParamsReq
 
 	if resp.DepositParams != nil {
 		minDeposit := sdk.NewCoins(resp.DepositParams.MinDeposit...)
-		response.DepositParams = v1beta1.NewDepositParams(minDeposit, *resp.DepositParams.MaxDepositPeriod)
+		response.DepositParams = v1beta1.NewDepositParams(minDeposit, resp.DepositParams.MaxDepositPeriod)
 	}
 
 	if resp.VotingParams != nil {
-		response.VotingParams = v1beta1.NewVotingParams(*resp.VotingParams.VotingPeriod)
+		response.VotingParams = v1beta1.NewVotingParams(resp.VotingParams.VotingPeriod)
 	}
 
 	if resp.TallyParams != nil {

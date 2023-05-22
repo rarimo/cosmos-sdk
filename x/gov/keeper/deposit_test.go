@@ -34,7 +34,7 @@ func TestDeposits(t *testing.T) {
 	require.False(t, found)
 	proposal, ok := app.GovKeeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	require.Nil(t, proposal.VotingStartTime)
+	require.Zero(t, proposal.VotingStartBlock)
 
 	// Check first deposit
 	votingStarted, err := app.GovKeeper.AddDeposit(ctx, proposalID, TestAddrs[0], fourStake)
@@ -78,7 +78,7 @@ func TestDeposits(t *testing.T) {
 	// Check that proposal moved to voting period
 	proposal, ok = app.GovKeeper.GetProposal(ctx, proposalID)
 	require.True(t, ok)
-	require.True(t, proposal.VotingStartTime.Equal(ctx.BlockHeader().Time))
+	require.Equal(t, proposal.VotingStartBlock, uint64(ctx.BlockHeader().Height))
 
 	// Test deposit iterator
 	// NOTE order of deposits is determined by the addresses

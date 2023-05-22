@@ -1,12 +1,10 @@
 package gov_test
 
 import (
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -31,7 +29,7 @@ func TestTickExpiredDepositPeriod(t *testing.T) {
 
 	govMsgSvr := keeper.NewMsgServerImpl(app.GovKeeper)
 
-	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
@@ -47,29 +45,29 @@ func TestTickExpiredDepositPeriod(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(time.Duration(1) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + 1
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	newHeader = ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod)
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.True(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	gov.EndBlocker(ctx, app.GovKeeper)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 }
@@ -84,7 +82,7 @@ func TestTickMultipleExpiredDepositPeriod(t *testing.T) {
 
 	govMsgSvr := keeper.NewMsgServerImpl(app.GovKeeper)
 
-	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
@@ -100,15 +98,15 @@ func TestTickMultipleExpiredDepositPeriod(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(time.Duration(2) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + 1
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
@@ -125,30 +123,30 @@ func TestTickMultipleExpiredDepositPeriod(t *testing.T) {
 	require.NotNil(t, res)
 
 	newHeader = ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod).Add(time.Duration(-1) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod) - 1
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.True(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	gov.EndBlocker(ctx, app.GovKeeper)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	newHeader = ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(time.Duration(5) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + 1
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.True(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	gov.EndBlocker(ctx, app.GovKeeper)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 }
@@ -163,10 +161,10 @@ func TestTickPassedDepositPeriod(t *testing.T) {
 
 	govMsgSvr := keeper.NewMsgServerImpl(app.GovKeeper)
 
-	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
-	activeQueue := app.GovKeeper.ActiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	activeQueue := app.GovKeeper.ActiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, activeQueue.Valid())
 	activeQueue.Close()
 
@@ -184,15 +182,15 @@ func TestTickPassedDepositPeriod(t *testing.T) {
 
 	proposalID := res.ProposalId
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(time.Duration(1) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + 1
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
@@ -202,7 +200,7 @@ func TestTickPassedDepositPeriod(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res1)
 
-	activeQueue = app.GovKeeper.ActiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	activeQueue = app.GovKeeper.ActiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, activeQueue.Valid())
 	activeQueue.Close()
 }
@@ -219,10 +217,10 @@ func TestTickPassedVotingPeriod(t *testing.T) {
 
 	govMsgSvr := keeper.NewMsgServerImpl(app.GovKeeper)
 
-	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue := app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
-	activeQueue := app.GovKeeper.ActiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	activeQueue := app.GovKeeper.ActiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, activeQueue.Valid())
 	activeQueue.Close()
 
@@ -239,7 +237,7 @@ func TestTickPassedVotingPeriod(t *testing.T) {
 	proposalID := res.ProposalId
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(time.Duration(1) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + 1
 	ctx = ctx.WithBlockHeader(newHeader)
 
 	newDepositMsg := v1.NewMsgDeposit(addrs[1], proposalID, proposalCoins)
@@ -249,14 +247,14 @@ func TestTickPassedVotingPeriod(t *testing.T) {
 	require.NotNil(t, res1)
 
 	newHeader = ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod).Add(*app.GovKeeper.GetVotingParams(ctx).VotingPeriod)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod) + int64(app.GovKeeper.GetVotingParams(ctx).VotingPeriod)
 	ctx = ctx.WithBlockHeader(newHeader)
 
-	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	inactiveQueue = app.GovKeeper.InactiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, inactiveQueue.Valid())
 	inactiveQueue.Close()
 
-	activeQueue = app.GovKeeper.ActiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	activeQueue = app.GovKeeper.ActiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.True(t, activeQueue.Valid())
 
 	activeProposalID := types.GetProposalIDFromBytes(activeQueue.Value())
@@ -268,7 +266,7 @@ func TestTickPassedVotingPeriod(t *testing.T) {
 
 	gov.EndBlocker(ctx, app.GovKeeper)
 
-	activeQueue = app.GovKeeper.ActiveProposalQueueIterator(ctx, ctx.BlockHeader().Time)
+	activeQueue = app.GovKeeper.ActiveProposalQueueIterator(ctx, uint64(ctx.BlockHeader().Height))
 	require.False(t, activeQueue.Valid())
 	activeQueue.Close()
 }
@@ -316,7 +314,7 @@ func TestProposalPassedEndblocker(t *testing.T) {
 	require.NoError(t, err)
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod).Add(*app.GovKeeper.GetVotingParams(ctx).VotingPeriod)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod+app.GovKeeper.GetVotingParams(ctx).VotingPeriod)
 	ctx = ctx.WithBlockHeader(newHeader)
 
 	gov.EndBlocker(ctx, app.GovKeeper)
@@ -358,7 +356,7 @@ func TestEndBlockerProposalHandlerFailed(t *testing.T) {
 	require.NoError(t, err)
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod).Add(*app.GovKeeper.GetVotingParams(ctx).VotingPeriod)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod+app.GovKeeper.GetVotingParams(ctx).VotingPeriod)
 	ctx = ctx.WithBlockHeader(newHeader)
 
 	// validate that the proposal fails/has been rejected

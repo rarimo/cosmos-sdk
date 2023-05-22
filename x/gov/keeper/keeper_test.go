@@ -89,7 +89,7 @@ func TestProposalQueues(t *testing.T) {
 	proposal, err := app.GovKeeper.SubmitProposal(ctx, tp, "")
 	require.NoError(t, err)
 
-	inactiveIterator := app.GovKeeper.InactiveProposalQueueIterator(ctx, *proposal.DepositEndTime)
+	inactiveIterator := app.GovKeeper.InactiveProposalQueueIterator(ctx, proposal.DepositEndBlock)
 	require.True(t, inactiveIterator.Valid())
 
 	proposalID := types.GetProposalIDFromBytes(inactiveIterator.Value())
@@ -101,7 +101,7 @@ func TestProposalQueues(t *testing.T) {
 	proposal, ok := app.GovKeeper.GetProposal(ctx, proposal.Id)
 	require.True(t, ok)
 
-	activeIterator := app.GovKeeper.ActiveProposalQueueIterator(ctx, *proposal.VotingEndTime)
+	activeIterator := app.GovKeeper.ActiveProposalQueueIterator(ctx, proposal.VotingEndBlock)
 	require.True(t, activeIterator.Valid())
 
 	proposalID, _ = types.SplitActiveProposalQueueKey(activeIterator.Key())

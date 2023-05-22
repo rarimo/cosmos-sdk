@@ -65,16 +65,16 @@ func (keeper Keeper) SubmitProposal(ctx sdk.Context, messages []sdk.Msg, metadat
 		return v1.Proposal{}, err
 	}
 
-	submitTime := ctx.BlockHeader().Time
+	submitBlock := uint64(ctx.BlockHeader().Height)
 	depositPeriod := keeper.GetDepositParams(ctx).MaxDepositPeriod
 
-	proposal, err := v1.NewProposal(messages, proposalID, metadata, submitTime, submitTime.Add(*depositPeriod))
+	proposal, err := v1.NewProposal(messages, proposalID, metadata, submitBlock, submitBlock+depositPeriod)
 	if err != nil {
 		return v1.Proposal{}, err
 	}
 
 	keeper.SetProposal(ctx, proposal)
-	keeper.InsertInactiveProposalQueue(ctx, proposalID, *proposal.DepositEndTime)
+	keeper.InsertInactiveProposalQueue(ctx, proposalID, proposal.DepositEndBlock)
 	keeper.SetProposalID(ctx, proposalID+1)
 
 	// called right after a proposal is submitted
@@ -130,11 +130,11 @@ func (keeper Keeper) DeleteProposal(ctx sdk.Context, proposalID uint64) {
 		panic(fmt.Sprintf("couldn't find proposal with id#%d", proposalID))
 	}
 
-	if proposal.DepositEndTime != nil {
-		keeper.RemoveFromInactiveProposalQueue(ctx, proposalID, *proposal.DepositEndTime)
+	if proposal.DepositEndBlock != 0 {
+		keeper.RemoveFromInactiveProposalQueue(ctx, proposalID, proposal.DepositEndBlock)
 	}
-	if proposal.VotingEndTime != nil {
-		keeper.RemoveFromActiveProposalQueue(ctx, proposalID, *proposal.VotingEndTime)
+	if proposal.VotingEndBlock != 0 {
+		keeper.RemoveFromActiveProposalQueue(ctx, proposalID, proposal.VotingEndBlock)
 	}
 
 	store.Delete(types.ProposalKey(proposalID))
@@ -235,16 +235,16 @@ func (keeper Keeper) SetProposalID(ctx sdk.Context, proposalID uint64) {
 }
 
 func (keeper Keeper) ActivateVotingPeriod(ctx sdk.Context, proposal v1.Proposal) {
-	startTime := ctx.BlockHeader().Time
-	proposal.VotingStartTime = &startTime
+	startBlock := ctx.BlockHeader().Height
+	proposal.VotingStartBlock = uint64(startBlock)
 	votingPeriod := keeper.GetVotingParams(ctx).VotingPeriod
-	endTime := proposal.VotingStartTime.Add(*votingPeriod)
-	proposal.VotingEndTime = &endTime
+	endBlock := proposal.VotingStartBlock + votingPeriod
+	proposal.VotingEndBlock = endBlock
 	proposal.Status = v1.StatusVotingPeriod
 	keeper.SetProposal(ctx, proposal)
 
-	keeper.RemoveFromInactiveProposalQueue(ctx, proposal.Id, *proposal.DepositEndTime)
-	keeper.InsertActiveProposalQueue(ctx, proposal.Id, *proposal.VotingEndTime)
+	keeper.RemoveFromInactiveProposalQueue(ctx, proposal.Id, proposal.DepositEndBlock)
+	keeper.InsertActiveProposalQueue(ctx, proposal.Id, proposal.VotingEndBlock)
 }
 
 func (keeper Keeper) MarshalProposal(proposal v1.Proposal) ([]byte, error) {

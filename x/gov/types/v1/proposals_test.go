@@ -2,10 +2,8 @@ package v1_test
 
 import (
 	"fmt"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/gov/types/v1"
@@ -37,7 +35,7 @@ func TestNestedAnys(t *testing.T) {
 	testProposal := v1beta1.NewTextProposal("Proposal", "testing proposal")
 	msgContent, err := v1.NewLegacyContent(testProposal, "cosmos1govacct")
 	require.NoError(t, err)
-	proposal, err := v1.NewProposal([]sdk.Msg{msgContent}, 1, "", time.Now(), time.Now())
+	proposal, err := v1.NewProposal([]sdk.Msg{msgContent}, 1, "", uint64(42), uint64(42))
 	require.NoError(t, err)
 
 	require.Equal(t, "TODO Fix panic here", proposal.String())

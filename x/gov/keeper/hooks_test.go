@@ -1,11 +1,9 @@
 package keeper_test
 
 import (
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -71,7 +69,7 @@ func TestHooks(t *testing.T) {
 	require.True(t, govHooksReceiver.AfterProposalSubmissionValid)
 
 	newHeader := ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod).Add(time.Duration(1) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetDepositParams(ctx).MaxDepositPeriod+1)
 	ctx = ctx.WithBlockHeader(newHeader)
 	gov.EndBlocker(ctx, app.GovKeeper)
 
@@ -90,7 +88,7 @@ func TestHooks(t *testing.T) {
 	require.True(t, govHooksReceiver.AfterProposalVoteValid)
 
 	newHeader = ctx.BlockHeader()
-	newHeader.Time = ctx.BlockHeader().Time.Add(*app.GovKeeper.GetVotingParams(ctx).VotingPeriod).Add(time.Duration(1) * time.Second)
+	newHeader.Height = ctx.BlockHeader().Height + int64(app.GovKeeper.GetVotingParams(ctx).VotingPeriod) + 1
 	ctx = ctx.WithBlockHeader(newHeader)
 	gov.EndBlocker(ctx, app.GovKeeper)
 	require.True(t, govHooksReceiver.AfterProposalVotingPeriodEndedValid)

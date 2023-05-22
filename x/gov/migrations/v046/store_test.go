@@ -1,10 +1,8 @@
 package v046_test
 
 import (
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	"github.com/cosmos/cosmos-sdk/testutil"
@@ -22,16 +20,16 @@ func TestMigrateStore(t *testing.T) {
 	ctx := testutil.DefaultContext(govKey, sdk.NewTransientStoreKey("transient_test"))
 	store := ctx.KVStore(govKey)
 
-	propTime := time.Unix(1e9, 0)
+	propBlock := uint64(200000000)
 
 	// Create 2 proposals
-	prop1, err := v1beta1.NewProposal(v1beta1.NewTextProposal("my title 1", "my desc 1"), 1, propTime, propTime)
+	prop1, err := v1beta1.NewProposal(v1beta1.NewTextProposal("my title 1", "my desc 1"), 1, propBlock, propBlock)
 	require.NoError(t, err)
 	prop1Bz, err := cdc.Marshal(&prop1)
 	require.NoError(t, err)
 	prop2, err := v1beta1.NewProposal(upgradetypes.NewSoftwareUpgradeProposal("my title 2", "my desc 2", upgradetypes.Plan{
 		Name: "my plan 2",
-	}), 2, propTime, propTime)
+	}), 2, propBlock, propBlock)
 	require.NoError(t, err)
 	prop2Bz, err := cdc.Marshal(&prop2)
 	require.NoError(t, err)
@@ -86,8 +84,8 @@ func compareProps(t *testing.T, oldProp v1beta1.Proposal, newProp v1.Proposal) {
 	// Compare UNIX times, as a simple Equal gives difference between Local and
 	// UTC times.
 	// ref: https://github.com/golang/go/issues/19486#issuecomment-292968278
-	require.Equal(t, oldProp.SubmitTime.Unix(), newProp.SubmitTime.Unix())
-	require.Equal(t, oldProp.DepositEndTime.Unix(), newProp.DepositEndTime.Unix())
-	require.Equal(t, oldProp.VotingStartTime.Unix(), newProp.VotingStartTime.Unix())
-	require.Equal(t, oldProp.VotingEndTime.Unix(), newProp.VotingEndTime.Unix())
+	require.Equal(t, oldProp.SubmitBlock, newProp.SubmitBlock)
+	require.Equal(t, oldProp.DepositEndBlock, newProp.DepositEndBlock)
+	require.Equal(t, oldProp.VotingStartBlock, newProp.VotingStartBlock)
+	require.Equal(t, oldProp.VotingEndBlock, newProp.VotingEndBlock)
 }

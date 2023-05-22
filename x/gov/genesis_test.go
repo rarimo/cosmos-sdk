@@ -92,7 +92,7 @@ func TestImportExportQueues(t *testing.T) {
 	ctx2 := app2.BaseApp.NewContext(false, tmproto.Header{})
 
 	// Jump the time forward past the DepositPeriod and VotingPeriod
-	ctx2 = ctx2.WithBlockTime(ctx2.BlockHeader().Time.Add(*app2.GovKeeper.GetDepositParams(ctx2).MaxDepositPeriod).Add(*app2.GovKeeper.GetVotingParams(ctx2).VotingPeriod))
+	ctx2 = ctx2.WithBlockHeight(ctx2.BlockHeader().Height + int64(app2.GovKeeper.GetDepositParams(ctx2).MaxDepositPeriod+app2.GovKeeper.GetVotingParams(ctx2).VotingPeriod))
 
 	// Make sure that they are still in the DepositPeriod and VotingPeriod respectively
 	proposal1, ok = app2.GovKeeper.GetProposal(ctx2, proposalID1)

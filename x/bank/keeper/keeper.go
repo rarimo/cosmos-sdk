@@ -44,6 +44,9 @@ type Keeper interface {
 	MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error
 	BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) error
 
+	MintTokens(ctx sdk.Context, address sdk.AccAddress, amounts sdk.Coins) error
+	BurnTokens(ctx sdk.Context, address sdk.AccAddress, amounts sdk.Coins) error
+
 	DelegateCoins(ctx sdk.Context, delegatorAddr, moduleAccAddr sdk.AccAddress, amt sdk.Coins) error
 	UndelegateCoins(ctx sdk.Context, moduleAccAddr, delegatorAddr sdk.AccAddress, amt sdk.Coins) error
 
@@ -466,6 +469,66 @@ func (k BaseKeeper) BurnCoins(ctx sdk.Context, moduleName string, amounts sdk.Co
 	// emit burn event
 	ctx.EventManager().EmitEvent(
 		types.NewCoinBurnEvent(acc.GetAddress(), amounts),
+	)
+
+	return nil
+}
+
+// MintTokens creates new coins from thin air and adds it to the provided account.
+// It will panic if the account does not exist.
+func (k BaseKeeper) MintTokens(ctx sdk.Context, address sdk.AccAddress, amounts sdk.Coins) error {
+	acc := k.ak.GetAccount(ctx, address)
+	if acc == nil {
+		panic(sdkerrors.Wrapf(sdkerrors.ErrUnknownAddress, "account %s does not exist", address.String()))
+	}
+
+	err := k.addCoins(ctx, address, amounts)
+	if err != nil {
+		return sdkerrors.Wrapf(err, "failed to mint tokens to %s account", address.String())
+	}
+
+	for _, amount := range amounts {
+		supply := k.GetSupply(ctx, amount.GetDenom())
+		supply = supply.Add(amount)
+		k.setSupply(ctx, supply)
+	}
+
+	logger := k.Logger(ctx)
+	logger.Info("minted tokens:", "amount", amounts.String(), "to", address.String())
+
+	// emit mint event
+	ctx.EventManager().EmitEvent(
+		types.NewCoinMintEvent(address, amounts),
+	)
+
+	return nil
+}
+
+// BurnTokens burns coins deletes coins from the balance of the account.
+// It will panic if the account does not exist.
+func (k BaseKeeper) BurnTokens(ctx sdk.Context, address sdk.AccAddress, amounts sdk.Coins) error {
+	acc := k.ak.GetAccount(ctx, address)
+	if acc == nil {
+		panic(sdkerrors.Wrapf(sdkerrors.ErrUnknownAddress, "account %s does not exist", address.String()))
+	}
+
+	err := k.subUnlockedCoins(ctx, address, amounts)
+	if err != nil {
+		return sdkerrors.Wrapf(err, "failed to burn tokens from %s account", address.String())
+	}
+
+	for _, amount := range amounts {
+		supply := k.GetSupply(ctx, amount.GetDenom())
+		supply = supply.Sub(amount)
+		k.setSupply(ctx, supply)
+	}
+
+	logger := k.Logger(ctx)
+	logger.Info("burned tokens from account", "amount", amounts.String(), "from", address.String())
+
+	// emit mint event
+	ctx.EventManager().EmitEvent(
+		types.NewCoinBurnEvent(address, amounts),
 	)
 
 	return nil

@@ -1,12 +1,10 @@
 package testutil
 
 import (
-	"testing"
-	"time"
-
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -17,8 +15,8 @@ func TestIntegrationTestSuite(t *testing.T) {
 	cfg.NumValidators = 1
 	suite.Run(t, NewIntegrationTestSuite(cfg))
 
-	dp := v1.NewDepositParams(sdk.NewCoins(sdk.NewCoin(cfg.BondDenom, v1.DefaultMinDepositTokens)), time.Duration(15)*time.Second)
-	vp := v1.NewVotingParams(time.Duration(5) * time.Second)
+	dp := v1.NewDepositParams(sdk.NewCoins(sdk.NewCoin(cfg.BondDenom, v1.DefaultMinDepositTokens)), 3)
+	vp := v1.NewVotingParams(1)
 	genesisState := v1.DefaultGenesisState()
 	genesisState.DepositParams = &dp
 	genesisState.VotingParams = &vp

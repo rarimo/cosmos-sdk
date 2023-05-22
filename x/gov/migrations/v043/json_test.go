@@ -48,7 +48,7 @@ func TestMigrateJSON(t *testing.T) {
 	// - Votes are all ADR-037 weighted votes with weight 1.
 	expected := `{
 	"deposit_params": {
-		"max_deposit_period": "0s",
+		"max_deposit_period": "0",
 		"min_deposit": []
 	},
 	"deposits": [],
@@ -117,7 +117,7 @@ func TestMigrateJSON(t *testing.T) {
 		}
 	],
 	"voting_params": {
-		"voting_period": "0s"
+		"voting_period": "0"
 	}
 }`
 

@@ -11,7 +11,7 @@ import (
 
 // Default period for deposits & voting
 const (
-	DefaultPeriod time.Duration = time.Hour * 24 * 2 // 2 days
+	DefaultPeriod uint64 = uint64(time.Hour * 24 * 2 / (5 * time.Second)) // 2 days in blocks
 )
 
 // Default governance params
@@ -39,10 +39,10 @@ func ParamKeyTable() paramtypes.KeyTable {
 }
 
 // NewDepositParams creates a new DepositParams object
-func NewDepositParams(minDeposit sdk.Coins, maxDepositPeriod time.Duration) DepositParams {
+func NewDepositParams(minDeposit sdk.Coins, maxDepositPeriodInBlocks uint64) DepositParams {
 	return DepositParams{
 		MinDeposit:       minDeposit,
-		MaxDepositPeriod: &maxDepositPeriod,
+		MaxDepositPeriod: maxDepositPeriodInBlocks,
 	}
 }
 
@@ -68,8 +68,8 @@ func validateDepositParams(i interface{}) error {
 	if !sdk.Coins(v.MinDeposit).IsValid() {
 		return fmt.Errorf("invalid minimum deposit: %s", v.MinDeposit)
 	}
-	if v.MaxDepositPeriod == nil || v.MaxDepositPeriod.Seconds() <= 0 {
-		return fmt.Errorf("maximum deposit period must be positive: %d", v.MaxDepositPeriod)
+	if v.MaxDepositPeriod == 0 {
+		return errors.New("maximum deposit period must be above zero")
 	}
 
 	return nil
@@ -137,9 +137,9 @@ func validateTallyParams(i interface{}) error {
 }
 
 // NewVotingParams creates a new VotingParams object
-func NewVotingParams(votingPeriod time.Duration) VotingParams {
+func NewVotingParams(votingPeriodInBlocks uint64) VotingParams {
 	return VotingParams{
-		VotingPeriod: &votingPeriod,
+		VotingPeriod: votingPeriodInBlocks,
 	}
 }
 
@@ -159,12 +159,8 @@ func validateVotingParams(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v.VotingPeriod == nil {
-		return errors.New("voting period must not be nil")
-	}
-
-	if v.VotingPeriod.Seconds() <= 0 {
-		return fmt.Errorf("voting period must be positive: %s", v.VotingPeriod)
+	if v.VotingPeriod <= 0 {
+		return errors.New("voting period must be above zero")
 	}
 
 	return nil

@@ -2,12 +2,10 @@ package v1
 
 import (
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
+	"strings"
 )
 
 const (
@@ -23,7 +21,7 @@ const (
 )
 
 // NewProposal creates a new Proposal instance
-func NewProposal(messages []sdk.Msg, id uint64, metadata string, submitTime, depositEndTime time.Time) (Proposal, error) {
+func NewProposal(messages []sdk.Msg, id uint64, metadata string, submitBlock, depositEndBlock uint64) (Proposal, error) {
 	msgs, err := sdktx.SetMsgs(messages)
 	if err != nil {
 		return Proposal{}, err
@@ -37,8 +35,8 @@ func NewProposal(messages []sdk.Msg, id uint64, metadata string, submitTime, dep
 		Metadata:         metadata,
 		Status:           StatusDepositPeriod,
 		FinalTallyResult: &tally,
-		SubmitTime:       &submitTime,
-		DepositEndTime:   &depositEndTime,
+		SubmitBlock:      submitBlock,
+		DepositEndBlock:  depositEndBlock,
 	}
 
 	return p, nil

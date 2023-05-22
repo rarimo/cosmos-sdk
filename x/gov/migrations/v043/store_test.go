@@ -26,6 +26,7 @@ func TestMigrateStore(t *testing.T) {
 	_, _, addr1 := testdata.KeyTestPubAddr()
 	proposalID := uint64(6)
 	now := time.Now()
+	nowBlock := uint64(ctx.BlockHeader().Height)
 	// Use dummy value for keys where we don't test values.
 	dummyValue := []byte("foo")
 	// Use real values for votes, as we're testing weighted votes.
@@ -46,12 +47,12 @@ func TestMigrateStore(t *testing.T) {
 		{
 			"ActiveProposalQueue",
 			v042gov.ActiveProposalQueueKey(proposalID, now), dummyValue,
-			types.ActiveProposalQueueKey(proposalID, now), dummyValue,
+			types.ActiveProposalQueueKey(proposalID, nowBlock), dummyValue,
 		},
 		{
 			"InactiveProposalQueue",
 			v042gov.InactiveProposalQueueKey(proposalID, now), dummyValue,
-			types.InactiveProposalQueueKey(proposalID, now), dummyValue,
+			types.InactiveProposalQueueKey(proposalID, nowBlock), dummyValue,
 		},
 		{
 			"ProposalIDKey",

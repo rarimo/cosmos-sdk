@@ -48,11 +48,11 @@ message Proposal {
   // querying a proposal via gRPC, this field is not populated until the
   // proposal's voting period has ended.
   TallyResult               final_tally_result        = 4;
-  google.protobuf.Timestamp submit_time               = 5 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp deposit_end_time          = 6 [(gogoproto.stdtime) = true];
+  uint64   submit_block                           = 5 [(gogoproto.moretags) = "yaml:\"submit_block\""];
+  uint64   deposit_end_block                      = 6 [(gogoproto.moretags) = "yaml:\"deposit_end_block\""];
   repeated cosmos.base.v1beta1.Coin total_deposit     = 7 [(gogoproto.nullable) = false];
-  google.protobuf.Timestamp         voting_start_time = 8 [(gogoproto.stdtime) = true];
-  google.protobuf.Timestamp         voting_end_time   = 9 [(gogoproto.stdtime) = true];
+  uint64 voting_start_block = 8 [(gogoproto.moretags) = "yaml:\"voting_start_block\""];
+  uint64 voting_end_block   = 9 [(gogoproto.moretags) = "yaml:\"voting_end_block\""];
 
   // metadata is any arbitrary metadata attached to the proposal.
   string metadata = 10;
@@ -105,16 +105,16 @@ message DepositParams {
   repeated cosmos.base.v1beta1.Coin min_deposit = 1
       [(gogoproto.nullable) = false, (gogoproto.jsontag) = "min_deposit,omitempty"];
 
-  //  Maximum period for Atom holders to deposit on a proposal. Initial value: 2
-  //  months.
-  google.protobuf.Duration max_deposit_period = 2
-      [(gogoproto.stdduration) = true, (gogoproto.jsontag) = "max_deposit_period,omitempty"];
+  //  Maximum period for Atom holders to deposit on a proposal in blocks.
+  uint64 max_deposit_period = 2
+  [(gogoproto.jsontag) = "max_deposit_period,omitempty", (gogoproto.moretags) = "yaml:\"max_deposit_period\""];
 }
 
 // VotingParams defines the params for voting on governance proposals.
 message VotingParams {
-  //  Length of the voting period.
-  google.protobuf.Duration voting_period = 1 [(gogoproto.stdduration) = true];
+  //  Length of the voting period in blocks.
+  uint64 voting_period = 1
+  [(gogoproto.jsontag) = "voting_period,omitempty", (gogoproto.moretags) = "yaml:\"voting_period\""];
 }
 
 // TallyParams defines the params for tallying votes on governance proposals.

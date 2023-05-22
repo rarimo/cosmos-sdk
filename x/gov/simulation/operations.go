@@ -1,10 +1,6 @@
 package simulation
 
 import (
-	"math"
-	"math/rand"
-	"time"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp/helpers"
@@ -15,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/gov/types"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"math"
+	"math/rand"
 )
 
 var initialProposalID = uint64(100000000000000)
@@ -211,10 +209,10 @@ func SimulateMsgSubmitProposal(
 
 		fops := make([]simtypes.FutureOperation, numVotes+1)
 		for i := 0; i < numVotes; i++ {
-			whenVote := ctx.BlockHeader().Time.Add(time.Duration(r.Int63n(int64(votingPeriod.Seconds()))) * time.Second)
+			whenVote := uint64(ctx.BlockHeader().Height) + votingPeriod
 			fops[i] = simtypes.FutureOperation{
-				BlockTime: whenVote,
-				Op:        operationSimulateMsgVote(ak, bk, k, accs[whoVotes[i]], int64(proposalID)),
+				BlockHeight: int(whenVote),
+				Op:          operationSimulateMsgVote(ak, bk, k, accs[whoVotes[i]], int64(proposalID)),
 			}
 		}
 

@@ -3,10 +3,8 @@ package simulation_test
 import (
 	"encoding/binary"
 	"fmt"
-	"testing"
-	"time"
-
 	"github.com/stretchr/testify/require"
+	"testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/simapp"
@@ -26,12 +24,11 @@ func TestDecodeStore(t *testing.T) {
 	cdc := simapp.MakeTestEncodingConfig().Codec
 	dec := simulation.NewDecodeStore(cdc)
 
-	endTime := time.Now().UTC()
 	content, ok := v1beta1.ContentFromProposalType("test", "test", v1beta1.ProposalTypeText)
 	require.True(t, ok)
-	proposalA, err := v1beta1.NewProposal(content, 1, endTime, endTime.Add(24*time.Hour))
+	proposalA, err := v1beta1.NewProposal(content, 1, 0, 100)
 	require.NoError(t, err)
-	proposalB, err := v1beta1.NewProposal(content, 2, endTime, endTime.Add(24*time.Hour))
+	proposalB, err := v1beta1.NewProposal(content, 2, 0, 100)
 	require.NoError(t, err)
 
 	proposalIDBz := make([]byte, 8)
@@ -58,8 +55,8 @@ func TestDecodeStore(t *testing.T) {
 		},
 		{
 			"proposal IDs",
-			kv.Pair{Key: types.InactiveProposalQueueKey(1, endTime), Value: proposalIDBz},
-			kv.Pair{Key: types.InactiveProposalQueueKey(1, endTime), Value: proposalIDBz},
+			kv.Pair{Key: types.InactiveProposalQueueKey(1, 0), Value: proposalIDBz},
+			kv.Pair{Key: types.InactiveProposalQueueKey(1, 0), Value: proposalIDBz},
 			"proposalIDA: 1\nProposalIDB: 1", false,
 		},
 		{

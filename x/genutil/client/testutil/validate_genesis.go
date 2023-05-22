@@ -43,8 +43,8 @@ var v040Valid = `{
 			  }
 			],
 			"proposals": [],
-			"deposit_params": { "min_deposit": [], "max_deposit_period": "0s" },
-			"voting_params": { "voting_period": "0s" },
+			"deposit_params": { "min_deposit": [], "max_deposit_period": "0" },
+			"voting_params": { "voting_period": "0" },
 			"tally_params": { "quorum": "0", "threshold": "0", "veto_threshold": "0" }
 		}	  
 	},

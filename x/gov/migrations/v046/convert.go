@@ -26,20 +26,20 @@ func ConvertToLegacyProposal(proposal v1.Proposal) (v1beta1.Proposal, error) {
 		return v1beta1.Proposal{}, err
 	}
 
-	if proposal.VotingStartTime != nil {
-		legacyProposal.VotingStartTime = *proposal.VotingStartTime
+	if proposal.VotingStartBlock != 0 {
+		legacyProposal.VotingStartBlock = proposal.VotingStartBlock
 	}
 
-	if proposal.VotingEndTime != nil {
-		legacyProposal.VotingEndTime = *proposal.VotingEndTime
+	if proposal.VotingEndBlock != 0 {
+		legacyProposal.VotingEndBlock = proposal.VotingEndBlock
 	}
 
-	if proposal.SubmitTime != nil {
-		legacyProposal.SubmitTime = *proposal.SubmitTime
+	if proposal.SubmitBlock != 0 {
+		legacyProposal.SubmitBlock = proposal.SubmitBlock
 	}
 
-	if proposal.DepositEndTime != nil {
-		legacyProposal.DepositEndTime = *proposal.DepositEndTime
+	if proposal.DepositEndBlock != 0 {
+		legacyProposal.DepositEndBlock = proposal.DepositEndBlock
 	}
 
 	msgs, err := proposal.GetMsgs()
@@ -166,13 +166,13 @@ func convertToNewVotes(oldVotes v1beta1.Votes) (v1.Votes, error) {
 func convertToNewDepParams(oldDepParams v1beta1.DepositParams) v1.DepositParams {
 	return v1.DepositParams{
 		MinDeposit:       oldDepParams.MinDeposit,
-		MaxDepositPeriod: &oldDepParams.MaxDepositPeriod,
+		MaxDepositPeriod: oldDepParams.MaxDepositPeriod,
 	}
 }
 
 func convertToNewVotingParams(oldVoteParams v1beta1.VotingParams) v1.VotingParams {
 	return v1.VotingParams{
-		VotingPeriod: &oldVoteParams.VotingPeriod,
+		VotingPeriod: oldVoteParams.VotingPeriod,
 	}
 }
 
@@ -204,11 +204,11 @@ func convertToNewProposal(oldProp v1beta1.Proposal) (v1.Proposal, error) {
 			AbstainCount:    oldProp.FinalTallyResult.Abstain.String(),
 			NoWithVetoCount: oldProp.FinalTallyResult.NoWithVeto.String(),
 		},
-		SubmitTime:      &oldProp.SubmitTime,
-		DepositEndTime:  &oldProp.DepositEndTime,
-		TotalDeposit:    oldProp.TotalDeposit,
-		VotingStartTime: &oldProp.VotingStartTime,
-		VotingEndTime:   &oldProp.VotingEndTime,
+		SubmitBlock:      oldProp.SubmitBlock,
+		DepositEndBlock:  oldProp.DepositEndBlock,
+		TotalDeposit:     oldProp.TotalDeposit,
+		VotingStartBlock: oldProp.VotingStartBlock,
+		VotingEndBlock:   oldProp.VotingEndBlock,
 	}, nil
 }
 

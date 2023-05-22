@@ -35,9 +35,9 @@ func InitGenesis(ctx sdk.Context, ak types.AccountKeeper, bk types.BankKeeper, k
 	for _, proposal := range data.Proposals {
 		switch proposal.Status {
 		case v1.StatusDepositPeriod:
-			k.InsertInactiveProposalQueue(ctx, proposal.Id, *proposal.DepositEndTime)
+			k.InsertInactiveProposalQueue(ctx, proposal.Id, proposal.DepositEndBlock)
 		case v1.StatusVotingPeriod:
-			k.InsertActiveProposalQueue(ctx, proposal.Id, *proposal.VotingEndTime)
+			k.InsertActiveProposalQueue(ctx, proposal.Id, proposal.VotingEndBlock)
 		}
 		k.SetProposal(ctx, *proposal)
 	}

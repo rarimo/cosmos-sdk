@@ -18,7 +18,7 @@ func EndBlocker(ctx sdk.Context, keeper keeper.Keeper) {
 	logger := keeper.Logger(ctx)
 
 	// delete dead proposals from store and returns theirs deposits. A proposal is dead when it's inactive and didn't get enough deposit on time to get into voting phase.
-	keeper.IterateInactiveProposalsQueue(ctx, ctx.BlockHeader().Time, func(proposal v1.Proposal) bool {
+	keeper.IterateInactiveProposalsQueue(ctx, uint64(ctx.BlockHeader().Height), func(proposal v1.Proposal) bool {
 		keeper.DeleteProposal(ctx, proposal.Id)
 		keeper.RefundAndDeleteDeposits(ctx, proposal.Id) // refund deposit if proposal got removed without getting 100% of the proposal
 
@@ -44,7 +44,7 @@ func EndBlocker(ctx sdk.Context, keeper keeper.Keeper) {
 	})
 
 	// fetch active proposals whose voting periods have ended (are passed the block time)
-	keeper.IterateActiveProposalsQueue(ctx, ctx.BlockHeader().Time, func(proposal v1.Proposal) bool {
+	keeper.IterateActiveProposalsQueue(ctx, uint64(ctx.BlockHeader().Height), func(proposal v1.Proposal) bool {
 		var tagValue, logMsg string
 
 		passes, burnDeposits, tallyResults := keeper.Tally(ctx, proposal)
@@ -108,7 +108,7 @@ func EndBlocker(ctx sdk.Context, keeper keeper.Keeper) {
 		proposal.FinalTallyResult = &tallyResults
 
 		keeper.SetProposal(ctx, proposal)
-		keeper.RemoveFromActiveProposalQueue(ctx, proposal.Id, *proposal.VotingEndTime)
+		keeper.RemoveFromActiveProposalQueue(ctx, proposal.Id, proposal.VotingEndBlock)
 
 		// when proposal become active
 		keeper.AfterProposalVotingPeriodEnded(ctx, proposal.Id)

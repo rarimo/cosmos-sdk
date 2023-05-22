@@ -3,11 +3,9 @@ package keeper_test
 import (
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/require"
 
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -33,15 +31,15 @@ func (suite *KeeperTestSuite) TestActivateVotingPeriod() {
 	proposal, err := suite.app.GovKeeper.SubmitProposal(suite.ctx, tp, "")
 	suite.Require().NoError(err)
 
-	suite.Require().Nil(proposal.VotingStartTime)
+	suite.Require().Zero(proposal.VotingStartBlock)
 
 	suite.app.GovKeeper.ActivateVotingPeriod(suite.ctx, proposal)
 
 	proposal, ok := suite.app.GovKeeper.GetProposal(suite.ctx, proposal.Id)
 	suite.Require().True(ok)
-	suite.Require().True(proposal.VotingStartTime.Equal(suite.ctx.BlockHeader().Time))
+	suite.Require().Equal(proposal.VotingStartBlock, uint64(suite.ctx.BlockHeader().Height))
 
-	activeIterator := suite.app.GovKeeper.ActiveProposalQueueIterator(suite.ctx, *proposal.VotingEndTime)
+	activeIterator := suite.app.GovKeeper.ActiveProposalQueueIterator(suite.ctx, proposal.VotingEndBlock)
 	suite.Require().True(activeIterator.Valid())
 
 	proposalID := types.GetProposalIDFromBytes(activeIterator.Value())
@@ -94,7 +92,7 @@ func (suite *KeeperTestSuite) TestGetProposalsFiltered() {
 
 	for _, s := range status {
 		for i := 0; i < 50; i++ {
-			p, err := v1.NewProposal(TestProposal, proposalID, "", time.Now(), time.Now())
+			p, err := v1.NewProposal(TestProposal, proposalID, "", uint64(suite.ctx.BlockHeader().Height), uint64(suite.ctx.BlockHeader().Height))
 			suite.Require().NoError(err)
 
 			p.Status = s
