@@ -6,7 +6,6 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/any.proto";
 import "google/api/annotations.proto";
 import "cosmos/auth/v1beta1/auth.proto";
-import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/cosmos/cosmos-sdk/x/auth/types";
 
@@ -83,7 +82,7 @@ message QueryAccountsRequest {
 // Since: cosmos-sdk 0.43
 message QueryAccountsResponse {
   // accounts are the existing accounts
-  repeated google.protobuf.Any accounts = 1 [(cosmos_proto.accepts_interface) = "AccountI"];
+  repeated google.protobuf.Any accounts = 1;
 
   // pagination defines the pagination in the response.
   cosmos.base.query.v1beta1.PageResponse pagination = 2;
@@ -95,13 +94,13 @@ message QueryAccountRequest {
   option (gogoproto.goproto_getters) = false;
 
   // address defines the address to query for.
-  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string address = 1;
 }
 
 // QueryAccountResponse is the response type for the Query/Account RPC method.
 message QueryAccountResponse {
   // account defines the account of the corresponding address.
-  google.protobuf.Any account = 1 [(cosmos_proto.accepts_interface) = "AccountI"];
+  google.protobuf.Any account = 1;
 }
 
 // QueryParamsRequest is the request type for the Query/Params RPC method.
@@ -122,7 +121,7 @@ message QueryModuleAccountsRequest {}
 //
 // Since: cosmos-sdk 0.46
 message QueryModuleAccountsResponse {
-  repeated google.protobuf.Any accounts = 1 [(cosmos_proto.accepts_interface) = "ModuleAccountI"];
+  repeated google.protobuf.Any accounts = 1;
 }
 
 // QueryModuleAccountByNameRequest is the request type for the Query/ModuleAccountByName RPC method.
@@ -132,7 +131,7 @@ message QueryModuleAccountByNameRequest {
 
 // QueryModuleAccountByNameResponse is the response type for the Query/ModuleAccountByName RPC method.
 message QueryModuleAccountByNameResponse {
-  google.protobuf.Any account = 1 [(cosmos_proto.accepts_interface) = "ModuleAccountI"];
+  google.protobuf.Any account = 1;
 }
 
 // Bech32PrefixRequest is the request type for Bech32Prefix rpc method.
@@ -189,5 +188,5 @@ message QueryAccountAddressByIDRequest {
 //
 // Since: cosmos-sdk 0.46.2
 message QueryAccountAddressByIDResponse {
-  string account_address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string account_address = 1;
 }

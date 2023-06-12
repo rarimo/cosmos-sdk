@@ -5,7 +5,7 @@ package cosmos.gov.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/gov/v1/gov.proto";
 import "gogoproto/gogo.proto";
-import "cosmos_proto/cosmos.proto";
+
 import "google/protobuf/any.proto";
 import "cosmos/msg/v1/msg.proto";
 
@@ -37,7 +37,7 @@ message MsgSubmitProposal {
 
   repeated google.protobuf.Any messages             = 1;
   repeated cosmos.base.v1beta1.Coin initial_deposit = 2 [(gogoproto.nullable) = false];
-  string                            proposer        = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string                            proposer        = 3 ;
   // metadata is any arbitrary metadata attached to the proposal.
   string metadata = 4;
 }
@@ -53,7 +53,7 @@ message MsgExecLegacyContent {
   option (cosmos.msg.v1.signer) = "authority";
 
   // content is the proposal's content.
-  google.protobuf.Any content = 1 [(cosmos_proto.accepts_interface) = "Content"];
+  google.protobuf.Any content = 1;
   // authority must be the gov module address.
   string authority = 2;
 }
@@ -66,7 +66,7 @@ message MsgVote {
   option (cosmos.msg.v1.signer) = "voter";
 
   uint64     proposal_id = 1 [(gogoproto.jsontag) = "proposal_id"];
-  string     voter       = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string     voter       = 2 ;
   VoteOption option      = 3;
   string     metadata    = 4;
 }
@@ -79,7 +79,7 @@ message MsgVoteWeighted {
   option (cosmos.msg.v1.signer) = "voter";
 
   uint64                      proposal_id = 1 [(gogoproto.jsontag) = "proposal_id"];
-  string                      voter       = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string                      voter       = 2 ;
   repeated WeightedVoteOption options     = 3;
   string                      metadata    = 4;
 }
@@ -92,7 +92,7 @@ message MsgDeposit {
   option (cosmos.msg.v1.signer) = "depositor";
 
   uint64   proposal_id                     = 1 [(gogoproto.jsontag) = "proposal_id"];
-  string   depositor                       = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string   depositor                       = 2 ;
   repeated cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }
 
