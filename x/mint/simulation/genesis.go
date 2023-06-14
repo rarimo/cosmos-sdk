@@ -82,7 +82,7 @@ func RandomizedGenState(simState *module.SimulationState) {
 
 	params := types.DefaultParams()
 
-	mintGenesis := types.NewGenesisState(types.InitialMinter(inflation), params)
+	mintGenesis := types.NewGenesisState(params)
 
 	bz, err := json.MarshalIndent(&mintGenesis, "", " ")
 	if err != nil {
