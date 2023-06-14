@@ -18,7 +18,8 @@ var (
 	KeyInflationMax        = []byte("InflationMax")
 	KeyInflationMin        = []byte("InflationMin")
 	KeyGoalBonded          = []byte("GoalBonded")
-	KeyBlocksPerYear       = []byte("BlocksPerYear")
+	KeyBlocksPerMonth      = []byte("BlocksPerMonth")
+	KeyMonthReward         = []byte("MonthReward")
 )
 
 // ParamTable for minting module.
@@ -27,7 +28,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 }
 
 func NewParams(
-	mintDenom string, inflationRateChange, inflationMax, inflationMin, goalBonded sdk.Dec, blocksPerYear uint64,
+	mintDenom string, inflationRateChange, inflationMax, inflationMin, goalBonded sdk.Dec, blocksPerMonth uint64, monthReward sdk.Coin,
 ) Params {
 	return Params{
 		MintDenom:           mintDenom,
@@ -35,7 +36,8 @@ func NewParams(
 		InflationMax:        inflationMax,
 		InflationMin:        inflationMin,
 		GoalBonded:          goalBonded,
-		BlocksPerYear:       blocksPerYear,
+		BlocksPerMonth:      blocksPerMonth,
+		MonthReward:         monthReward,
 	}
 }
 
@@ -47,7 +49,8 @@ func DefaultParams() Params {
 		InflationMax:        sdk.NewDecWithPrec(20, 2),
 		InflationMin:        sdk.NewDecWithPrec(7, 2),
 		GoalBonded:          sdk.NewDecWithPrec(67, 2),
-		BlocksPerYear:       uint64(60 * 60 * 8766 / 5), // assuming 5 second block times
+		BlocksPerMonth:      uint64(60 * 60 * 24 * 30 / 5), // assuming 5 second block times
+		MonthReward:         sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(223696209754194)),
 	}
 }
 
@@ -68,7 +71,10 @@ func (p Params) Validate() error {
 	if err := validateGoalBonded(p.GoalBonded); err != nil {
 		return err
 	}
-	if err := validateBlocksPerYear(p.BlocksPerYear); err != nil {
+	if err := validateBlocksPerMonth(p.BlocksPerMonth); err != nil {
+		return err
+	}
+	if err := validateMonthReward(p.MonthReward); err != nil {
 		return err
 	}
 	if p.InflationMax.LT(p.InflationMin) {
@@ -95,7 +101,8 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyInflationMax, &p.InflationMax, validateInflationMax),
 		paramtypes.NewParamSetPair(KeyInflationMin, &p.InflationMin, validateInflationMin),
 		paramtypes.NewParamSetPair(KeyGoalBonded, &p.GoalBonded, validateGoalBonded),
-		paramtypes.NewParamSetPair(KeyBlocksPerYear, &p.BlocksPerYear, validateBlocksPerYear),
+		paramtypes.NewParamSetPair(KeyBlocksPerMonth, &p.BlocksPerMonth, validateBlocksPerMonth),
+		paramtypes.NewParamSetPair(KeyMonthReward, &p.MonthReward, validateMonthReward),
 	}
 }
 
@@ -179,7 +186,7 @@ func validateGoalBonded(i interface{}) error {
 	return nil
 }
 
-func validateBlocksPerYear(i interface{}) error {
+func validateBlocksPerMonth(i interface{}) error {
 	v, ok := i.(uint64)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
@@ -187,6 +194,19 @@ func validateBlocksPerYear(i interface{}) error {
 
 	if v == 0 {
 		return fmt.Errorf("blocks per year must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMonthReward(i interface{}) error {
+	v, ok := i.(sdk.Coin)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if !v.Amount.IsPositive() {
+		return fmt.Errorf("month reward must be positive: %d", v)
 	}
 
 	return nil
