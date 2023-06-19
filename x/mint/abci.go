@@ -16,6 +16,11 @@ func BeginBlocker(ctx sdk.Context, k keeper.Keeper) {
 	// fetch stored minter & params
 	params := k.GetParams(ctx)
 
+	// skip if all tokens already minted
+	if uint64(ctx.BlockHeight()) >= params.EndBlock {
+		return
+	}
+
 	monthReward := sdk.NewDecFromInt(params.MonthReward.Amount)
 	mintedAmount := monthReward.QuoInt(sdk.NewInt(int64(params.BlocksPerMonth)))
 

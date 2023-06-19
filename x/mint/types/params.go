@@ -16,6 +16,7 @@ var (
 	KeyMintDenom      = []byte("MintDenom")
 	KeyBlocksPerMonth = []byte("BlocksPerMonth")
 	KeyMonthReward    = []byte("MonthReward")
+	KeyEndBlock       = []byte("EndBlock")
 )
 
 // ParamTable for minting module.
@@ -24,12 +25,13 @@ func ParamKeyTable() paramtypes.KeyTable {
 }
 
 func NewParams(
-	mintDenom string, blocksPerMonth uint64, monthReward sdk.Coin,
+	mintDenom string, blocksPerMonth uint64, monthReward sdk.Coin, endBlock uint64,
 ) Params {
 	return Params{
 		MintDenom:      mintDenom,
 		BlocksPerMonth: blocksPerMonth,
 		MonthReward:    monthReward,
+		EndBlock:       endBlock,
 	}
 }
 
@@ -39,6 +41,7 @@ func DefaultParams() Params {
 		MintDenom:      sdk.DefaultBondDenom,
 		BlocksPerMonth: uint64(60 * 60 * 24 * 30 / 5), // assuming 5 second block times
 		MonthReward:    sdk.NewCoin(sdk.DefaultBondDenom, sdk.NewInt(223696209754194)),
+		EndBlock:       0,
 	}
 }
 
@@ -51,6 +54,9 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateMonthReward(p.MonthReward); err != nil {
+		return err
+	}
+	if err := validateEndBlock(p.EndBlock); err != nil {
 		return err
 	}
 	return nil
@@ -68,6 +74,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(KeyMintDenom, &p.MintDenom, validateMintDenom),
 		paramtypes.NewParamSetPair(KeyBlocksPerMonth, &p.BlocksPerMonth, validateBlocksPerMonth),
 		paramtypes.NewParamSetPair(KeyMonthReward, &p.MonthReward, validateMonthReward),
+		paramtypes.NewParamSetPair(KeyEndBlock, &p.EndBlock, validateEndBlock),
 	}
 }
 
@@ -108,6 +115,19 @@ func validateMonthReward(i interface{}) error {
 
 	if !v.Amount.IsPositive() {
 		return fmt.Errorf("month reward must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateEndBlock(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v == 0 {
+		return fmt.Errorf("end block must be positive: %d", v)
 	}
 
 	return nil

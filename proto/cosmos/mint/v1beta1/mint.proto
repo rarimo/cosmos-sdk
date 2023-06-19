@@ -14,7 +14,9 @@ message Params {
   string mint_denom = 1;
   // expected blocks per month
   uint64 blocks_per_month = 2;
-  //
-  cosmos.base.v1beta1.Coin month_reward = 3
+  // block when no additional tokens will be minted
+  uint64 end_block = 3;
+
+  cosmos.base.v1beta1.Coin month_reward = 4
       [(gogoproto.nullable) = false, (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Coin"];
 }
