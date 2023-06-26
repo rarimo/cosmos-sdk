@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -192,7 +193,7 @@ func (keeper Keeper) ActiveProposalQueueIterator(ctx sdk.Context, endBlock uint6
 // InactiveProposalQueueIterator returns an sdk.Iterator for all the proposals in the Inactive Queue that expire by endBlock
 func (keeper Keeper) InactiveProposalQueueIterator(ctx sdk.Context, endBlock uint64) sdk.Iterator {
 	store := ctx.KVStore(keeper.storeKey)
-	return sdk.KVStorePrefixIterator(store, types.ActiveProposalByTimeKey(endBlock))
+	return sdk.KVStorePrefixIterator(store, types.InactiveProposalByTimeKey(endBlock))
 }
 
 // assertMetadataLength returns an error if given metadata length
